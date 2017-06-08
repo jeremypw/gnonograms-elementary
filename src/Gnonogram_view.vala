@@ -33,6 +33,7 @@ public class View : Gtk.ApplicationWindow {
     private ModeButton mode_switch;
     private Gtk.Button load_game_button;
     private Gtk.Button save_game_button;
+    private Gtk.Button game_info_button;
     private Gtk.Button random_game_button;
     private Gtk.Button check_correct_button;
     private Model model {get; set;}
@@ -207,6 +208,9 @@ public class View : Gtk.ApplicationWindow {
             }
         });
         header_bar.pack_start (save_game_button);
+
+        game_info_button = new InfoMenu ();
+        header_bar.pack_start (game_info_button);
 
         random_game_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("list-add-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
