@@ -61,7 +61,7 @@ public class Filewriter : Object {
             game_path = path;
         }
 
-        if (game_path == "") {
+        if (game_path == null || game_path == "") {
             throw new IOError.CANCELLED ("No path selected");
         }
 
