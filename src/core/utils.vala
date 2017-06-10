@@ -246,7 +246,7 @@ namespace Utils {
         while (true) {
             response = dialog.run ();
             if (response == Gtk.ResponseType.NONE) {
-                dialog.set_current_folder (get_app ().load_game_dir);
+                dialog.set_current_folder (get_app ().builtin_game_dir);
             } else {
                 break;
             }

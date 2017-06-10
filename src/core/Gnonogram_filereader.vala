@@ -129,7 +129,8 @@ public class Filereader : Object {
                 case "DIM" :
                     in_error = !get_gnonogram_dimensions(bodies[i]); break;
                 case "ROW" :
-                    row_clues = get_gnonogram_clues (bodies[i], cols / 2 + 1);
+                    row_clues = get_gnonogram_clues (bodies[i], cols);
+
                     if (row_clues.length != rows) {
                         err_msg = "Wrong number of row clues";
                         in_error = true;
@@ -139,13 +140,17 @@ public class Filereader : Object {
                     break;
 
                 case "COL" :
-                    col_clues = get_gnonogram_clues(bodies[i], rows / 2 + 1);
-                    if (col_clues.length != cols) {
-                        err_msg = "Wrong number of column clues";
-                        in_error = true;
-                    } else {
-                        has_col_clues = true;
+                    col_clues = get_gnonogram_clues(bodies[i], rows);
+
+                    if (err_msg.length == 0) {
+                        if (col_clues.length != cols) {
+                            err_msg = "Wrong number of column clues - found %u, should be %u cols".printf (col_clues.length, cols);
+                        } else {
+                            has_col_clues = true;
+                        }
                     }
+
+                    in_error = err_msg.length > 0;
 
                     break;
                 case "SOL" :
@@ -329,7 +334,7 @@ public class Filereader : Object {
         string[] s = Utils.remove_blank_lines (line.split_set (", "));
         int b, zero_count = 0;
 
-        if (s == null) {
+        if (s == null || s.length > maxblock /2 + 1) {
             return null;
         }
 

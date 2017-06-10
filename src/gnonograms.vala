@@ -177,8 +177,7 @@ public const string UNSAVED_FILENAME = "Unsaved Game" + GAMEFILEEXTENSION;
 public class App : Granite.Application {
     public Controller controller;
     private string game_name;
-    public string load_game_dir;
-    public string save_game_dir;
+    public string builtin_game_dir {get; construct;}
 
     construct {
         application_id = "com.github.jeremypw.gnonograms-elementary";
@@ -215,6 +214,8 @@ public class App : Granite.Application {
         add_accelerator ("<Ctrl>q", "app.quit", null);
 
         game_name = "";
+
+        builtin_game_dir = Path.build_path (Path.DIR_SEPARATOR_S, build_pkg_data_dir, "games");
     }
 
     public override void startup () {
