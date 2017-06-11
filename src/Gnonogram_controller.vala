@@ -303,7 +303,7 @@ public class Controller : GLib.Object {
                 file_writer.write_game_file ();
             }
         } catch (IOError e) {
-            critical ("File writer error %s", e.message);
+            warning ("File writer error %s", e.message);
             return null;
         }
 
@@ -613,7 +613,7 @@ public class Controller : GLib.Object {
         string current_game_dir = "";
 
         if (!(game_path == null || game_path == "")) {
-            File.new_for_path (game_path).get_parent ().get_path ();
+            current_game_dir = File.new_for_path (game_path).get_parent ().get_path ();
         }
 
         /* Ensure we do not offer to save to the (unwritable) builtin game folder */
