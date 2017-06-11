@@ -22,7 +22,17 @@ namespace Gnonograms {
 
 class InfoMenu : Gtk.MenuButton {
     private InfoPopover info_popover;
-    public Gtk.Entry name_entry;
+    private Gtk.Entry name_entry;
+
+    public string name {
+        get {
+            return name_entry.text;
+        }
+
+        set {
+            name_entry.text = value;
+        }
+    }
 
     public signal void apply ();
 

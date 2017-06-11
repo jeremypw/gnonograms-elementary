@@ -28,12 +28,12 @@ public class View : Gtk.ApplicationWindow {
     private ResizeWidget col_resizer;
     private Gtk.HeaderBar header_bar;
     private AppMenu app_menu;
+    private InfoMenu game_info_menu;
     private Granite.Widgets.Toast toast;
 
     private ModeButton mode_switch;
     private Gtk.Button load_game_button;
     private Gtk.Button save_game_button;
-    private Gtk.Button game_info_button;
     private Gtk.Button random_game_button;
     private Gtk.Button check_correct_button;
     private Model model {get; set;}
@@ -124,6 +124,7 @@ public class View : Gtk.ApplicationWindow {
 
         set {
             header_bar.title = value;
+            game_info_menu.name = value;
         }
     }
 
@@ -209,8 +210,8 @@ public class View : Gtk.ApplicationWindow {
         });
         header_bar.pack_start (save_game_button);
 
-        game_info_button = new InfoMenu ();
-        header_bar.pack_start (game_info_button);
+        game_info_menu = new InfoMenu ();
+        header_bar.pack_start (game_info_menu);
 
         random_game_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("list-add-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
@@ -299,6 +300,7 @@ public class View : Gtk.ApplicationWindow {
         col_resizer.changed.connect (on_dimensions_changed);
 
         app_menu.apply.connect (on_app_menu_apply);
+        game_info_menu.apply.connect (on_game_info_apply);
     }
 
     private void set_default_fontheight_from_dimensions () {
@@ -624,6 +626,10 @@ public class View : Gtk.ApplicationWindow {
 
     public void on_app_menu_apply () {
         grade = (Difficulty)(app_menu.grade_val);
+    }
+
+    public void on_game_info_apply () {
+        header_bar.title = game_info_menu.name;
     }
 
 
