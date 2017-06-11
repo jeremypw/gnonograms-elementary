@@ -31,6 +31,19 @@ class InfoMenu : Gtk.MenuButton {
 
         set {
             name_entry.text = value;
+            name_entry.width_chars = value.length + 6;
+        }
+    }
+
+    private Gtk.Label author_entry_label;
+
+    public string author {
+        get {
+            return author_entry_label.label;
+        }
+
+        set {
+            author_entry_label.label = value;
         }
     }
 
@@ -41,19 +54,24 @@ class InfoMenu : Gtk.MenuButton {
         popover =  (Gtk.Popover)info_popover; /* Property of Gtk.MenuButton */
 
         var grid = new Gtk.Grid ();
-        popover.add (grid);
-
-        var name_label = new Gtk.Label ("Name");
-        name_label.xalign = 1;
-
-        name_entry = new Gtk.Entry ();
-
-        grid.attach (name_label, 0, 0, 1, 1);
-        grid.attach (name_entry, 1, 0, 1, 1);
-
         grid.row_spacing = 12;
         grid.column_spacing = 6;
         grid.border_width = 12;
+        popover.add (grid);
+
+        var name_label = new InfoLabel ("Name");
+        name_label.xalign = 1;
+        name_entry = new Gtk.Entry ();
+        name_entry.text = "";
+        grid.attach (name_label, 0, 0, 1, 1);
+        grid.attach (name_entry, 1, 0, 1, 1);
+
+        var author_label = new InfoLabel ("Author");
+        author_label.xalign = 1;
+        author_entry_label = new Gtk.Label (""); /* Author not editable? */
+        author_entry_label.xalign = 0;
+        grid.attach (author_label, 0, 1, 1, 1);
+        grid.attach (author_entry_label, 1, 1, 1, 1);
 
         clicked.connect (() => {
             store_values ();
@@ -109,6 +127,15 @@ class InfoMenu : Gtk.MenuButton {
 
         public InfoPopover (Gtk.Widget widget) {
             Object (relative_to: widget);
+        }
+    }
+
+    private class InfoLabel : Gtk.Label {
+        public InfoLabel (string? text) {
+            string txt = text != null ? text + ":" : "";
+            txt.replace ("::", ":");
+            string markup = Markup.printf_escaped ("<span weight=\"bold\">%s</span>", txt);
+            set_markup (markup);
         }
     }
 }

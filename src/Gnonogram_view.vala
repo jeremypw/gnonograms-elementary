@@ -128,6 +128,18 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
+    public string author {
+        get {
+            return game_info_menu.author;
+        }
+
+        set {
+            game_info_menu.author = value;
+        }
+    }
+
+
+
     private Cell current_cell {
         get {
             return cell_grid.current_cell;
@@ -210,9 +222,6 @@ public class View : Gtk.ApplicationWindow {
         });
         header_bar.pack_start (save_game_button);
 
-        game_info_menu = new InfoMenu ();
-        header_bar.pack_start (game_info_menu);
-
         random_game_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("list-add-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         random_game_button.image = img;
@@ -233,6 +242,9 @@ public class View : Gtk.ApplicationWindow {
 
         mode_switch = new ModeButton ();
         header_bar.pack_end (mode_switch);
+
+        game_info_menu = new InfoMenu ();
+        header_bar.pack_end (game_info_menu);
 
         toast = new Granite.Widgets.Toast ("Test");
         toast.set_default_action (null);

@@ -399,8 +399,10 @@ public class Controller : GLib.Object {
             title = reader.game_file.get_basename ();
         }
 
+        view.author = reader.author;
+
 #if 0 //To be implemented (maybe)
-        view.set_source(reader.author);
+
         view.set_date(reader.date);
         view.set_license(reader.license);
         view.set_score(reader.score);

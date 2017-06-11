@@ -96,10 +96,11 @@ public class Filereader : Object {
         string[] headings = {};
         string[] bodies = {};
 
-            stream.read_until ("[", out header_length, null);
+            stream.read_upto ("[", -1, out header_length, null);
             while (true) {
-                headings += stream.read_until ("]", out header_length, null);
-                bodies += stream.read_until ("[", out body_length, null);
+                headings += stream.read_line_utf8 (out header_length, null);
+
+                bodies += stream.read_upto ("[", -1, out body_length, null);
                 if (header_length == 0  ||  body_length == 0) {
                     break;
                 }
@@ -119,54 +120,46 @@ public class Filereader : Object {
 
             if (heading == null) {
                 continue;
+            } else {
+                heading = heading.up ();
             }
 
-            if (heading.length > 3) {
-                heading = heading.slice (0, 3);
-            }
+            if (heading.contains ("DIMENSION")) {
+                in_error = !get_gnonogram_dimensions(bodies[i]);
+            } else if (heading.contains ("ROW CLUES")) {
+                row_clues = get_gnonogram_clues (bodies[i], cols);
 
-            switch (heading.up ()) {
-                case "DIM" :
-                    in_error = !get_gnonogram_dimensions(bodies[i]); break;
-                case "ROW" :
-                    row_clues = get_gnonogram_clues (bodies[i], cols);
-
-                    if (row_clues.length != rows) {
-                        err_msg = "Wrong number of row clues";
-                        in_error = true;
-                    } else {
-                        has_row_clues = true;
-                    }
-                    break;
-
-                case "COL" :
-                    col_clues = get_gnonogram_clues(bodies[i], rows);
-
-                    if (err_msg.length == 0) {
-                        if (col_clues.length != cols) {
-                            err_msg = "Wrong number of column clues - found %u, should be %u cols".printf (col_clues.length, cols);
-                        } else {
-                            has_col_clues = true;
-                        }
-                    }
-
-                    in_error = err_msg.length > 0;
-
-                    break;
-                case "SOL" :
-                    in_error = !get_gnonogram_cellstate_array(bodies[i], true); break;
-                case "WOR" :
-                    in_error = !get_gnonogram_cellstate_array(bodies[i], false); break;
-                case "STA" :
-                    in_error = !get_gnonogram_state(bodies[i]); break;
-                case "DES" :
-                    in_error = !get_game_description(bodies[i]); break;
-                case "LIC" :
-                    in_error = !get_game_license(bodies[i]); break;
-                default :
-                    err_msg = "Unrecognized heading";
+                if (row_clues.length != rows) {
+                    err_msg = "Wrong number of row clues";
                     in_error = true;
-                    break;
+                } else {
+                    has_row_clues = true;
+                }
+            } else if (heading.contains ("COLUMN CLUES")) {
+                col_clues = get_gnonogram_clues(bodies[i], rows);
+
+                if (err_msg.length == 0) {
+                    if (col_clues.length != cols) {
+                        err_msg = "Wrong number of column clues - found %u, should be %u cols".printf (col_clues.length, cols);
+                    } else {
+                        has_col_clues = true;
+                    }
+                }
+
+                in_error = err_msg.length > 0;
+            } else if (heading.contains ("SOLUTION")) {
+                in_error = !get_gnonogram_cellstate_array(bodies[i], true);
+            } else if (heading.contains ("WORKING")) {
+                in_error = !get_gnonogram_cellstate_array(bodies[i], false);
+            } else if (heading.contains ("STATE")) {
+                in_error = !get_gnonogram_state(bodies[i]);
+            } else if (heading.contains ("DESCRIPTION")) {
+                in_error = !get_game_description(bodies[i]);
+            } else if (heading.contains ("LICENSE")) {
+                in_error = !get_game_license(bodies[i]);
+            } else {
+                err_msg = "Unrecognized heading %s".printf (heading);
+                in_error = true;
             }
         }
 
@@ -286,27 +279,29 @@ public class Filereader : Object {
         return true;
     }
 
+    /* Game description must be in correct order with blank lines for missing info */
     private bool get_game_description (string? body) {
         if (body == null) {
             return true;
         }
 
-        string[] s = Utils.remove_blank_lines (body.split("\n"));
+        string[] lines = body.split("\n");
 
-        if (s.length >= 1) {
-            name = Uri.unescape_string (s[0]);
+        /* There is a blank line at the beginning */
+        if (lines.length >= 1) {
+            name = Uri.unescape_string (lines[0]);
         }
 
-        if (s.length >= 2) {
-            author = Uri.unescape_string (s[1]);
+        if (lines.length >= 2) {
+            author = Uri.unescape_string (lines[1]);
         }
 
-        if (s.length >= 3) {
-            date = s[2];
+        if (lines.length >= 3) {
+            date = lines[2];
         }
 
-        if (s.length >= 4) {
-            score = s[3];
+        if (lines.length >= 4) {
+            score = lines[3];
         }
 
         return true;
