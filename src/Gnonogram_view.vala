@@ -194,7 +194,7 @@ public class View : Gtk.ApplicationWindow {
         save_game_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("document-save-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         save_game_button.image = img;
-        save_game_button.tooltip_text = _("Save a Game to File");
+        save_game_button.tooltip_text = _("Save a Game to File. Hold <Shift> to Select Location");
         save_game_button.button_release_event.connect ((event) => {
             set_mods (event.state);
             return false;

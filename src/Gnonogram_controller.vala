@@ -30,7 +30,7 @@ public class Controller : GLib.Object {
     private string? game_path = null;
     public string load_game_dir {get; set;}
     public string save_game_dir {get; set;}
-    public string current_game_path {get; construct;}
+    public string restore_game_path {get; construct;}
 
     private Gee.Deque<Move> back_stack;
     private Gee.Deque<Move> forward_stack;
@@ -134,7 +134,7 @@ public class Controller : GLib.Object {
             file.make_directory_with_parents (null);
         } catch (GLib.Error e) {warning ("Could not make %s - %s",file.get_uri (), e.message);}
 
-        current_game_path = Path.build_path (Path.DIR_SEPARATOR_S, data_home_folder_current, Gnonograms.UNSAVED_FILENAME);
+        restore_game_path = Path.build_path (Path.DIR_SEPARATOR_S, data_home_folder_current, Gnonograms.UNSAVED_FILENAME);
     }
 
 
@@ -240,17 +240,13 @@ public class Controller : GLib.Object {
         saved_state.set_int ("window-y", y);
         saved_state.set_string ("current-game-path", game_path);
 
-        save_current_game ();
-    }
-
-    private void save_current_game () {
         try {
-            var current_game = File.new_for_path (current_game_path);
-            current_game.@delete ();
+            var restore_game = File.new_for_path (restore_game_path);
+            restore_game.@delete ();
         } catch (GLib.Error e) {
             warning ("Error deleting current game file - %s", e.message);
         } finally {
-            write_game (current_game_path, true);
+            write_game (restore_game_path, true);
         }
     }
 
@@ -258,7 +254,7 @@ public class Controller : GLib.Object {
         int x, y;
         x = saved_state.get_int ("window-x");
         y = saved_state.get_int ("window-y");
-        game_path = saved_state.get_string ("current-game-path");
+        game_path = null;
 
         window.move (x, y);
     }
@@ -280,13 +276,12 @@ public class Controller : GLib.Object {
     }
 
     private bool restore_game () {
-        var current_game = File.new_for_path (current_game_path);
-        return load_game (current_game, false);
+        var restore_game = File.new_for_path (restore_game_path);
+        return load_game (restore_game, false);
     }
 
     private string? write_game (string? path, bool save_state = false) {
         Filewriter file_writer;
-
         try {
             file_writer = new Filewriter (window,
                                           save_game_dir,
@@ -612,9 +607,26 @@ public class Controller : GLib.Object {
     }
 
     private void on_save_game_request () {
-        var write_path = write_game (game_path, false); /* Do not save working */
+        string write_path;
 
-        if (game_path == null || game_path == "") {
+        var builtin = get_app ().builtin_game_dir;
+        string current_game_dir = "";
+
+        if (!(game_path == null || game_path == "")) {
+            File.new_for_path (game_path).get_parent ().get_path ();
+        }
+
+        /* Ensure we do not offer to save to the (unwritable) builtin game folder */
+        if (save_game_dir == builtin || current_game_dir == builtin) {
+            write_path = write_game (null, false);
+        } else {
+            write_path = write_game (game_path, false);
+        }
+
+
+        if (!(write_path == null || write_path == "") &&
+            (game_path == null || game_path == "")) {
+
             game_path = write_path;
         }
     }

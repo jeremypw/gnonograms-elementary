@@ -232,7 +232,13 @@ namespace Utils {
         if (start_path != null) {
             var start = File.new_for_path (start_path);
             if (start.query_file_type (GLib.FileQueryInfoFlags.NONE, null) == FileType.DIRECTORY) {
-                dialog.set_current_folder (start_path); //so Recently used folder not displayed
+                /* Need to use a timeout since set current folder does not work (or is over-ridden) until after
+                 * dialog current_folder set internally (see Pantheon Files FileChooserModule).
+                 */
+                Idle.add_full (GLib.Priority.LOW, () => {
+                    dialog.set_current_folder (start_path);
+                    return false;
+                });
             }
         }
 
@@ -242,9 +248,9 @@ namespace Utils {
         }
 
         int response;
-
         while (true) {
             response = dialog.run ();
+
             if (response == Gtk.ResponseType.NONE) {
                 dialog.set_current_folder (get_app ().builtin_game_dir);
             } else {
